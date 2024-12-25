@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html><head lang="en"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>Uplifting DINO</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="LUDVIG: Learning-free Uplifting of 2D Visual features to Gaussian Splatting scenes">
+    <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22&gt;%E2%9C%A8&lt;/text&gt;&lt;/svg&gt;">
+    <meta property="og:description" content="We address the task of uplifting visual features or semantic masks from 2D vision models to 3D scenes represented by Gaussian splatting. Whereas common approaches rely on iterative optimization-based procedures, we show that a simple yet effective aggregation technique yields excellent results. Applied to semantic masks from Segment Anything (SAM), our uplifting approach leads to segmentation quality comparable to the state of the art. We then extend this method to generic DINOv2 features, integrating 3D scene geometry through graph diffusion, and achieve competitive segmentation results despite DINOv2 not being trained on millions of annotated masks like SAM. When applied to CLIP features, our method demonstrates strong performance in open-vocabulary object detection tasks, highlighting the versatility of our approach.">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/codemirror.min.css">
+    <link rel="stylesheet" href="css/math.css">
+    <link rel="stylesheet" href="css/app.css">
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/codemirror.min.js"></script>
+    <script src="js/clipboard.min.js"></script>
+    <script src="js/video_comparison.js"></script>
+    <script src="js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+    <div class="container" id="header" style="text-align: center; margin: auto;">
+        <div class="row" id="title-row" style="max-width: 100%; margin: 0 auto; display: inline-block">
+            <h2 class="col-md-12 text-center" id="title">
+                <b>LUDVIG</b>: Learning-free Uplifting <br> of 2D Visual features to Gaussian Splatting scenes<br>
+            </h2>
+        </div>
+        <div class="row" id="author-row" style="margin:0 auto;">
+           <div class="col-md-12 text-center" style="display: table; margin:0 auto">
+                <p>
+                    <a style="text-decoration:none" href="https://scholar.google.com/citations?user=ILdhxG0AAAAJ&hl=en">
+                        Juliette Marrie<sup>1,2</sup>
+                    </a>
+                    &nbsp;&nbsp;
+                    <a style="text-decoration:none" href="http://rmenegaux.github.io/">
+                        Romain Menegaux<sup>1</sup>
+                    </a>
+                    &nbsp;&nbsp;
+                    <a style="text-decoration:none" href="https://michaelarbel.github.io/">
+                        Michael Arbel<sup>1</sup>
+                    </a>
+                    &nbsp;&nbsp;
+                    <a style="text-decoration:none" href="https://dlarlus.github.io/">
+                        Diane Larlus<sup>2</sup>
+                    </a>
+                    &nbsp;&nbsp;
+                    <a style="text-decoration:none" href="https://lear.inrialpes.fr/people/mairal/">
+                        Julien Mairal<sup>1</sup>
+                    </a>
+                </p>
+                <p>
+                    <sup>1</sup>Inria &nbsp;&nbsp; <sup>2</sup>NAVER LABS Europe
+                </p>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('author-row').style.maxWidth = document.getElementById("title-row").clientWidth + 'px';
+    </script>
+    <div class="container" id="main">
+        <div class="row">
+                <div class="col-sm-6 col-sm-offset-3 text-center">
+                    <ul class="nav nav-pills nav-justified">
+                        <li>
+                            <a href="https://arxiv.org/abs/2410.14462">
+                            <img src="./img/paper_image.png" height="60px">
+                                <h4><strong>Paper</strong></h4>
+                            </a>
+                        </li>
+                        <li>
+                            <img src="img/github.png" height="60px">
+                            <h4><strong>Code (coming soon)</strong></h4>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+        </div>
+
+        <div class="container-sm">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="video-compare-container" id="materialsDiv">
+                    <video class="video" id="materials" loop playsinline autoPlay muted src="video/lego.mp4" onplay="resizeAndPlay(this)"></video>
+                    
+                    <canvas height=0 class="videoMerge" id="materialsMerge"></canvas>
+                </div>
+			</div>
+            <div class="col-sm-4">
+                <div class="video-compare-container" id="materials2Div">
+                    <video class="video" id="materials2" loop playsinline autoPlay muted src="video/orchids.mp4" onplay="resizeAndPlay(this)"></video>
+                    
+                    <canvas height=0 class="videoMerge" id="materials2Merge"></canvas>
+                </div>
+			</div>
+            <div class="col-sm-4">
+                <div class="video-compare-container" id="materials3Div">
+                    <video class="video" id="materials3" loop playsinline autoPlay muted src="video/trex.mp4" onplay="resizeAndPlay(this)"></video>
+                    
+                    <canvas height=0 class="videoMerge" id="materials3Merge"></canvas>
+                </div>
+			</div>
+		    <figure style="text-align: center;">
+            <figcaption style="font-size: .9em; color: #555; font-style: italic, margin-top: 10px">
+            DINOv2 patch-level representations predicted from RGB images (left) are aggregated into highly detailed 3D representations (right).
+            </figcaption>
+            </figure>                
+        </div>
+        </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Abstract
+                </h3>
+                <p class="text-justify">
+                    We address the task of uplifting visual features or semantic masks from 2D vision models to 3D scenes represented by Gaussian splatting. Whereas common approaches rely on iterative optimization-based procedures, we show that a simple yet effective aggregation technique yields excellent results.
+                    Applied to semantic masks from Segment Anything (SAM), our uplifting approach leads to segmentation
+                    quality comparable to the state of the art. We then extend this method to generic DINOv2 features, integrating 3D scene geometry through graph diffusion, and achieve competitive segmentation results despite DINOv2 not being trained on millions of annotated masks like SAM.                </p>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Optimization-free uplifting
+                </h3>
+                <div class="text-center">
+                    <br>
+					 <img src="img/Uplift_and_render.png" width="60%">
+                </div>
+                <p class="text-justify">
+                <br>
+                We propose a simple, parameter-free aggregation mechanism to uplift visual features from models such as DINOv2, CLIP and SAM into 3D Gaussian Splatting scenes. Each Gaussian \( i \) in the scene is assigned a feature \( f_i \) defined as a weighted sum of the 2D features \( F \) over pixels affected by Gaussian \( i \) in the forward rendering process:
+                </p>
+                <div class="math-container">
+                    \[
+                        f_i = \underbrace{\sum_{d=1}^m \sum_p}_{\scriptsize \begin{array}{c} \text{Summation over all} \\ \text{directions $d$ and pixels $p$} \end{array}}
+                        \underbrace{\frac{\mathbf{1}_{i \in \mathcal{S}_{d,p}} w_i(d, p)}{\sum_{d=1}^m \sum_p \mathbf{1}_{i \in \mathcal{S}_{d,p}} w_i(d, p)}}_{\scriptsize \begin{array}{c} \text{Normalized weight of Gaussian $i$} \\  \text{at $(d,p)$ resulting from $\alpha$-blending} \\ \text{of Gaussians $S_{d,p}$ crossed along ray} \end{array}}
+                        \times \underbrace{F_{d,p}}_{\scriptsize \begin{array}{c} \text{Feature at pixel $p$} \\ \text{in direction $d$} \end{array}}
+                        \]
+                </div>                
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Diffusion on graphs
+                </h3>
+                <div class="text-justify">
+                    We define a graph where each Gaussian \( i \) is connected to its \( k \) nearest euclidean neighbors \( \mathcal{N}(i) \), with edge weights defined based on similarity between uplifted DINOv2 features. Given initial Gaussian features \( g_0 \) (e.g., a rough segmentation mask), the diffusion process runs as:
+                </div>
+                <div class="math-container">
+                        \[ 
+                        g_{k+1} = Ag_k,
+                        \quad A_{ij} = \underbrace{\mathbf{1}_{j \in \mathcal{N}(i)}}_{\scriptsize \begin{array}{c} \text{$1$ if $j$ is in the} \\ \text{neighborhood of Gaussian $i$} \end{array}}  
+                        \underbrace{S_f(f_i, f_j)}_{\scriptsize \begin{array}{c} \text{Similarity between} \\ \text{$f_i$ and $f_j$} \end{array}}
+                        .
+                        \underbrace{P(f_i)^{\frac 12}P(f_j)^{\frac 12}}_{\scriptsize \begin{array}{c} \text{Similarity between Gaussian} \\ \text{$i$ and reference Gaussians.} \\ \text{Prevents leakage into background.} \end{array}}
+                        \]
+                </div>  
+                <div class="text-center">
+		            <figure style="text-align: center;">
+                    <video id="refdir" width="30%" playsinline autoplay loop muted>
+                        <source src="video/diffusion_fern.mp4" type="video/mp4" />
+                    </video>
+                    <video id="refdir" width="30%" playsinline autoplay loop muted>
+                        <source src="video/diffusion_trex.mp4" type="video/mp4" />
+                    </video>
+                    <video id="refdir" width="30%" playsinline autoplay loop muted>
+                        <source src="video/diffusion_horns.mp4" type="video/mp4" />
+                    </video>
+                    <figcaption style="font-size: .9em; color: #555i; font-style: italic; margin-top: 10px">
+                    2D projection of the weight vector \( g_t \) during diffusion for foreground/background segmentation. \( g_0 \) is defined based on 2D scribbles of the object of interest provided on a reference view, which we uplift in 3D. The 3D scribbles spread to neighboring Gaussians with similar DINOv2 features.
+					</figcaption>
+                    </figure>                
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    LERF Localization
+                </h3>
+                <div class="text-justify">
+                    We uplift CLIP and DINOv2 features in 3D and use graph diffusion based on DINOv2 feature similarities to refine CLIP relevancy scores.
+                </div>
+                <div class="text-center">
+                <br>
+                <figure style="text-align: center;">
+					<video id="refdir" width="90%" playsinline autoplay loop muted>
+						<source src="video/figurines.mp4" type="video/mp4" />
+						Your browser does not support the video tag.
+					</video>
+					<video id="refdir" width="90%" playsinline autoplay loop muted>
+						<source src="video/teatime.mp4" type="video/mp4" />
+						Your browser does not support the video tag.
+					</video>
+					<figcaption style="margin-top: 10px; font-size: 1em; font-style: italic; color: #555;">
+						3D DINOv2 features (left), CLIP features (middle) and CLIP relevancy with text prompts (right).
+					</figcaption>
+				</figure>                
+            	</div>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-md-5 col-md-offset-2">
+            <h3>
+                Citation
+            </h3>
+                <textarea id="bibtex" class="form-control" readonly rows="10" cols="80">
+            @article{marrie2024ludvig,
+                title={LUDVIG: Learning-free uplifting of 2d visual features 
+                to Gaussian splatting scenes},
+                author={Marrie, Juliette and Menegaux, Romain and 
+                Arbel, Michael and Larlus, Diane and Mairal, Julien},
+                year={2024}
+            }</textarea>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Acknowledgements
+                </h3>
+                <p class="text-justify">
+                    <br>
+                The website template was borrowed from <a href="https://dorverbin.github.io/refnerf/"> Ref-NeRF</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+</body></html>

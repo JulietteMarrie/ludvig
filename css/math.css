@@ -1,0 +1,15 @@
+.math-container {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 1em;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.math-equation {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    display: inline-block;
+}
+

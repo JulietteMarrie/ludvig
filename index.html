@@ -3,7 +3,7 @@
     
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-    <title>Uplifting DINO</title>
+    <title>LUDVIG: Learning-free Uplifting <br> of 2D Visual features to Gaussian Splatting scenes</title>
 
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -138,10 +138,15 @@
                 <h3>
                     Optimization-free uplifting
                 </h3>
+                <figure style="text-align: center;">
                 <div class="text-center">
                     <br>
 					 <img src="img/Uplift_and_render.png" width="60%">
                 </div>
+                <figcaption style="font-size: .9em; color: #555; font-style: italic, margin-top: 10px">
+                    Illustration of the inverse and forward rendering of 2D visual features produced by DINOv2.
+                </figcaption>
+                </figure>                
                 <p class="text-justify">
                 <br>
                 We propose a simple, parameter-free aggregation mechanism to uplift visual features from models such as DINOv2, CLIP and SAM into 3D Gaussian Splatting scenes. Each Gaussian \( i \) in the scene is assigned a feature \( f_i \) defined as a weighted sum of the 2D features \( F \) over pixels affected by Gaussian \( i \) in the forward rendering process:

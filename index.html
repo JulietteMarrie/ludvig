@@ -151,12 +151,12 @@
                 </figure>                
                 <p class="text-justify">
                 <br>
-                We propose a simple, parameter-free aggregation mechanism to uplift visual features from models such as DINOv2, CLIP and SAM into 3D Gaussian Splatting scenes. Each Gaussian \( i \) in the scene is assigned a feature \( f_i \) defined as a weighted sum of the 2D features \( F \) over pixels affected by Gaussian \( i \) in the forward rendering process:
+                We propose a simple, parameter-free aggregation mechanism to uplift visual features from models such as DINOv2, CLIP and SAM into 3D Gaussian Splatting scenes. Each Gaussian \( i \) in the scene is assigned a feature \( f_i \) defined as a weighted sum of the 2D features \( F \) over the set of pixels $\mathcal{S}_i$ affected by Gaussian \( i \) in the forward rendering process:
                 </p>
                 <div class="math-container">
                     \[
-                        f_i = \underbrace{\sum_{d=1}^m \sum_p}_{\scriptsize \begin{array}{c} \text{Summation over all} \\ \text{directions $d$ and pixels $p$} \end{array}}
-                        \underbrace{\frac{\mathbf{1}_{i \in \mathcal{S}_{d,p}} w_i(d, p)}{\sum_{d=1}^m \sum_p \mathbf{1}_{i \in \mathcal{S}_{d,p}} w_i(d, p)}}_{\scriptsize \begin{array}{c} \text{Normalized weight of Gaussian $i$} \\  \text{at $(d,p)$ resulting from $\alpha$-blending} \\ \text{of Gaussians $S_{d,p}$ crossed along ray} \end{array}}
+                    f_i = \underbrace{\sum_{(d,p)\in\mathcal{S}_i}}_{\scriptsize \begin{array}{c} \text{Summation over all} \\ \text{directions $d$ and pixels $p$} \end{array}}
+                    \underbrace{\frac{w_i(d, p)}{\sum_{d=1}^m \sum_p w_i(d, p)}}_{\scriptsize \begin{array}{c} \text{Normalized weight of Gaussian $i$} \\  \text{at $(d,p)$ resulting from $\alpha$-blending} \\ \text{of Gaussians crossed along ray} \end{array}}
                         \times \underbrace{F_{d,p}}_{\scriptsize \begin{array}{c} \text{Feature at pixel $p$} \\ \text{in direction $d$} \end{array}}
                         \]
                 </div>                
@@ -227,9 +227,9 @@
         </div>
         <br>
         <div class="row">
-            <div class="col-md-5 col-md-offset-2">
+            <div class="col-md-8 col-md-offset-2">
             <h3>
-                Citation
+                Citing LUDVIG
             </h3>
                 <textarea id="bibtex" class="form-control" readonly rows="10" cols="80">
         @article{marrie2024ludvig,
